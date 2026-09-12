@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Happy International Programmers' Day 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'] },
+          keyframes: {
+            blink: { '0%,100%': { opacity: '1' }, '50%': { opacity: '0' } },
+            floatY: { '0%,100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-12px)' } },
+            glowTitle: {
+              '0%,100%': { textShadow: '0 0 12px rgba(34,211,238,.75), 0 0 30px rgba(34,211,238,.4), 0 0 60px rgba(52,211,153,.25)' },
+              '50%': { textShadow: '0 0 6px rgba(34,211,238,.55), 0 0 18px rgba(34,211,238,.3), 0 0 40px rgba(52,211,153,.15)' }
+            },
+            ringPulse: {
+              '0%': { boxShadow: '0 0 0 0 rgba(34,211,238,.55), 0 0 30px rgba(34,211,238,.35)' },
+              '70%': { boxShadow: '0 0 0 18px rgba(34,211,238,0), 0 0 60px rgba(34,211,238,.2)' },
+              '100%': { boxShadow: '0 0 0 0 rgba(34,211,238,0), 0 0 30px rgba(34,211,238,.35)' }
+            },
+            bounceSoft: { '0%,100%': { transform: 'translateY(0) scale(1)' }, '50%': { transform: 'translateY(-6px) scale(1.06)' } },
+            hueSpin: { '0%': { filter: 'hue-rotate(0deg)' }, '100%': { filter: 'hue-rotate(360deg)' } },
+            shimmer: { '0%': { backgroundPosition: '-200% 0' }, '100%': { backgroundPosition: '200% 0' } }
+          },
+          animation: {
+            blink: 'blink 1s step-end infinite',
+            floatY: 'floatY 4s ease-in-out infinite',
+            glowTitle: 'glowTitle 3s ease-in-out infinite',
+            ringPulse: 'ringPulse 2.4s ease-out infinite',
+            bounceSoft: 'bounceSoft 2.6s ease-in-out infinite',
+            hueSpin: 'hueSpin 16s linear infinite',
+            shimmer: 'shimmer 3s linear infinite'
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    html, body { height: 100%; }
+    body {
+      background: #020617;
+      overflow: hidden;
+    }
+    .bg-anim {
+      position: fixed; inset: 0; z-index: 0;
+      background:
+        radial-gradient(ellipse 90% 70% at 15% -10%, rgba(34,211,238,.22), transparent 60%),
+        radial-gradient(ellipse 70% 60% at 85% 0%, rgba(129,140,248,.18), transparent 60%),
+        radial-gradient(ellipse 70% 60% at 10% 110%, rgba(52,211,153,.14), transparent 60%),
+        radial-gradient(ellipse 60% 50% at 90% 110%, rgba(251,191,36,.12), transparent 60%),
+        #020617;
+      animation: hueSpin 16s linear infinite;
+    }
+    #binary-canvas { position: fixed; inset: 0; z-index: 1; opacity: .28; }
+    #particles { position: fixed; inset: 0; z-index: 2; pointer-events: none; overflow: hidden; }
+
+    .ascii-art {
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      color: rgba(15,23,42,.001); /* invisible until typed */
+    }
+    .char { opacity: 0; transition: opacity .4s ease; }
+    .char.show { opacity: 1; }
+    .ascii-art .char:hover { color: #facc15; text-shadow: 0 0 8px rgba(250,204,21,.8); }
+
+    #cursor, .cursor {
+      display: inline-block;
+      color: #22d3ee;
+      text-shadow: 0 0 10px #22d3ee;
+      animation: blink 1s step-end infinite;
+    }
+    .hide-until { opacity: 0; transition: opacity 1s ease; }
+    .hide-until.show { opacity: 1; }
+
+    .glass {
+      background: rgba(15,23,42,.55);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(148,163,184,.18);
+    }
+    .scrollbar-hide::-webkit-scrollbar { display: none; }
+    .pre-line { line-height: 1.55; }
+  </style>
+</head>
+<body class="text-slate-200 font-mono select-none">
+  <div class="bg-anim"></div>
+  <canvas id="binary-canvas"></canvas>
+  <div id="particles"></div>
+
+  <main class="relative z-10 h-screen flex flex-col items-center justify-center gap-5 px-4 overflow-hidden">
+
+    <button id="restart-btn" onclick="runAll()"
+      class="hide-until text-xs px-5 py-2 rounded-full border border-cyan-400/40 text-cyan-300 hover:bg-cyan-400/10 hover:scale-105 transition-all duration-300 shadow-[0_0_20px_rgba(34,211,238,.15)]">
+      ↻ re-run the magic
+    </button>
+
+    <pre id="ascii" class="ascii-art text-[6px] sm:text-[8px] md:text-[10px] leading-tight text-center"></pre>
+
+    <h1 id="title" class="text-3xl md:text-6xl font-bold text-center animate-glowTitle leading-tight">
+      <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-sky-400 to-emerald-300">International</span>
+      <span id="title-rest"></span>
+    </h1>
+
+    <div id="badge" class="flex items-center justify-center gap-3 px-5 py-3 rounded-2xl glass animate-ringPulse">
+      <span class="text-2xl animate-bounceSoft">💻</span>
+      <p id="badge-text" class="text-cyan-100 text-sm sm:text-base"><span id="badge-caret"></span></p>
+      <span class="text-2xl animate-bounceSoft" style="animation-delay:.3s">🎂</span>
+    </div>
+
+    <div id="code-window" class="w-full max-w-xl rounded-2xl glass shadow-2xl shadow-cyan-500/10 overflow-hidden">
+      <div class="flex items-center gap-2 px-4 py-3 border-b border-slate-700/50 bg-slate-900/50">
+        <span class="w-3 h-3 rounded-full bg-red-400/90"></span>
+        <span class="w-3 h-3 rounded-full bg-yellow-400/90"></span>
+        <span class="w-3 h-3 rounded-full bg-emerald-400/90"></span>
+        <span id="win-title" class="ml-3 text-xs text-slate-400">programmers-day.sh — bash</span>
+      </div>
+      <pre id="code-output" class="p-4 text-xs sm:text-sm text-slate-300 pre-line h-52 overflow-y-auto scrollbar-hide"></pre>
+    </div>
+
+    <p id="footer" class="hide-until text-[10px] text-slate-500 tracking-[0.3em] uppercase">print("Happy Coding")</p>
+  </main>
+
+  <script>
+    // ================= Binary rain =================
+    const canvas = document.getElementById('binary-canvas');
+    const ctx = canvas.getContext('2d');
+    const FONT = 16;
+    let cols, drops;
+    const BITS = '01';
+
+    function sizeRain() {
+      canvas.width = innerWidth;
+      canvas.height = innerHeight;
+      cols = Math.floor(canvas.width / FONT);
+      drops = Array(cols).fill(0).map(() => Math.random() * -40);
+    }
+    function rain() {
+      ctx.fillStyle = 'rgba(2,6,23,.09)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.font = FONT + 'px "JetBrains Mono", monospace';
+      for (let i = 0; i < cols; i++) {
+        ctx.fillStyle = Math.random() < .08 ? '#facc15' : Math.random() < .5 ? '#22d3ee' : '#0e7490';
+        ctx.fillText(BITS[Math.floor(Math.random() * 2)], i * FONT, drops[i] * FONT);
+        if (drops[i] * FONT > canvas.height + 40 && Math.random() > .98) drops[i] = Math.random() * -20;
+        drops[i]++;
+      }
+      requestAnimationFrame(rain);
+    }
+    sizeRain(); rain();
+    addEventListener('resize', sizeRain);
+
+    // ================= Floating code particles =================
+    const partBox = document.getElementById('particles');
+    const GLYPHS = ['{','}','<','>',';','(',')','=','*','/','#','0','1','[',']','&','|','~','λ','§'];
+    for (let i = 0; i < 34; i++) {
+      const s = document.createElement('span');
+      const size = 10 + Math.random() * 20;
+      s.textContent = GLYPHS[i % GLYPHS.length];
+      s.className = 'absolute animate-floatY';
+      s.style.cssText = `left:${Math.random()*100}%;top:${Math.random()*110-5}%;font-size:${size}px;` +
+        `color:hsla(${180+Math.random()*120},80%,65%,${.12+Math.random()*.28});` +
+        `animation-delay:${Math.random()*4}s;animation-duration:${3+Math.random()*4}s;`;
+      partBox.appendChild(s);
+    }
+
+    // ================= Typewriter engine =================
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+    // Mark all element text for slow typing (char-by-char)
+    async function typeInto(el, text, speed, caret) {
+      for (let i = 0; i < text.length; i++) {
+        el.textContent = text.slice(0, i + 1);
+        if (caret) caret.style.visibility = 'visible';
+        await sleep(speed);
+      }
+      if (caret) caret.style.visibility = 'hidden';
+    }
+
+    async function typeAscii(lines, charDelay) {
+      const el = document.getElementById('ascii');
+      el.textContent = '';
+      for (let li = 0; li < lines.length; li++) {
+        const line = lines[li];
+        const div = document.createElement('div');
+        el.appendChild(div);
+        for (let ci = 0; ci < line.length; ci++) {
+          const span = document.createElement('span');
+          span.className = 'char';
+          span.textContent = line[ci];
+          div.appendChild(span);
+          requestAnimationFrame(() => span.classList.add('show'));
+          await sleep(charDelay);
+        }
+        await sleep(150);
+      }
+    }
+
+    // ================= Map all content =================
+    const GLYPH =
+      '.------..------..------..------..------.    .------.\n' +
+      '|H.--. ||A.--. ||P.--. ||P.--. ||Y.--. |    |!.--. |\n' +
+      '| :/\\: || (\\/) || :/\\: || :/\\: || (\\/) |    | (\\/) |\n' +
+      '| :\\/: || :\\/: || (__) || (__) || :\\/: |    | :\\/: |\n' +
+      '| \'--\'H|| \'--\'A|| \'--\'P|| \'--\'P|| \'--\'Y|    | \'--\'!|\n' +
+      '`------\'`------\'`------\'`------\'`------\'    `------\'';
+
+    // Upper "International" is shown, then this gets typed slowly:
+    const TITLE = ' Happy Programmers\u2019 Day 2026!';
+    const BADGE = 'Happy International Programmers\u2019 Day — the 256th day, 0b100000000, 2\u2078! May your code compile first try.';
+
+    const CODE = [
+      { text: 'whoami', speed: 90, out: 'george@programmer'},
+      { text: 'date +%j', speed: 90, out: '256'},
+      { text: 'echo $((2**8))', speed: 90, out: '256'},
+      { text: 'echo "lock others love..."', speed: 70, out: null },
+      { text: 'grep -r "bugs" ~ --exclude=life', speed: 80, out: 'No matches found. Keep dreaming.' },
+      { text: 'git commit -m "Happy International Programmers\u2019 Day 2026"', speed: 60, out: 'Nothing to commit — everything is perfect.' },
+      { text: 'make coffee; make progress; celebrate()', speed: 75, out: '☕☕☕ compiling into legendary dev 🚀' }
+    ];
+
+    async function typeTerminal() {
+      const out = document.getElementById('code-output');
+      const winTitle = document.getElementById('win-title');
+      out.textContent = '';
+      let buffer = '';
+      for (let i = 0; i < CODE.length; i++) {
+        const cmd = CODE[i];
+        buffer += '$ ' + cmd.text;
+        await typeInto(out, buffer, cmd.speed, null);
+        if (cmd.out != null) {
+          await sleep(260);
+          buffer += '\n' + cmd.out + '\n';
+          await typeInto(out, buffer, 35, null);
+        } else {
+          await sleep(260);
+        }
+      }
+      await sleep(600);
+      winTitle.textContent = 'programmers-day.sh — bash — celebrating 🎉';
+    }
+
+    async function runAll() {
+      // reset
+      document.getElementById('ascii').replaceChildren();
+      document.getElementById('title-rest').textContent = '';
+      document.getElementById('badge-text').textContent = '';
+      const badgeCaret = document.createElement('span');
+      badgeCaret.id = 'badge-caret'; badgeCaret.className = 'cursor'; badgeCaret.textContent = '▋';
+      document.getElementById('badge-text').appendChild(badgeCaret);
+      document.getElementById('code-output').textContent = '';
+      document.querySelectorAll('.hide-until').forEach(e => e.classList.remove('show'));
+
+      await sleep(400);
+      // 1. ASCII art — slow char-by-char glow-in
+      await typeAscii(GLYPH.split('\n'), 9);
+      await sleep(350);
+
+      // 2. Title — slow typing
+      const tRest = document.getElementById('title-rest');
+      for (let i = 0; i < TITLE.length; i++) {
+        tRest.textContent = TITLE.slice(0, i + 1);
+        await sleep(110);
+      }
+      await sleep(120);
+
+      // 3. Badge — slow typing
+      const badgeText = document.getElementById('badge-text');
+      const carets = badgeText.querySelectorAll('.cursor');
+      const badgeCaretEl = carets[carets.length - 1];
+      badgeCaretEl.style.visibility = 'visible';
+      for (let i = 0; i < BADGE.length; i++) {
+        badgeText.textContent = BADGE.slice(0, i + 1);
+        badgeText.appendChild(badgeCaretEl);
+        await sleep(35);
+      }
+      badgeCaretEl.style.visibility = 'hidden';
+
+      // 4. Terminal — slow command-by-command
+      await sleep(200);
+      await typeTerminal();
+
+      // 5. Reveal restart button + footer
+      badgeCaretEl.remove();
+      document.getElementById('restart-btn').classList.add('show');
+      document.getElementById('footer').classList.add('show');
+    }
+
+    runAll();
+  </script>
+</body>
+</html>
