@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Happy International Programmers' Day 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'] },
+          keyframes: {
+            blink: { '0%,100%': { opacity: '1' }, '50%': { opacity: '0' } },
+            floatY: { '0%,100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-12px)' } },
+            glowTitle: {
+              '0%,100%': { textShadow: '0 0 12px rgba(34,211,238,.75), 0 0 30px rgba(34,211,238,.4), 0 0 60px rgba(52,211,153,.25)' },
+              '50%': { textShadow: '0 0 6px rgba(34,211,238,.55), 0 0 18px rgba(34,211,238,.3), 0 0 40px rgba(52,211,153,.15)' }
+            },
+            ringPulse: {
+              '0%': { boxShadow: '0 0 0 0 rgba(34,211,238,.55), 0 0 30px rgba(34,211,238,.35)' },
+              '70%': { boxShadow: '0 0 0 18px rgba(34,211,238,0), 0 0 60px rgba(34,211,238,.2)' },
+              '100%': { boxShadow: '0 0 0 0 rgba(34,211,238,0), 0 0 30px rgba(34,211,238,.35)' }
+            },
+            bounceSoft: { '0%,100%': { transform: 'translateY(0) scale(1)' }, '50%': { transform: 'translateY(-6px) scale(1.06)' } },
+            hueSpin: { '0%': { filter: 'hue-rotate(0deg)' }, '100%': { filter: 'hue-rotate(360deg)' } }
+          },
+          animation: {
+            blink: 'blink 1s step-end infinite',
+            floatY: 'floatY 4s ease-in-out infinite',
+            glowTitle: 'glowTitle 3s ease-in-out infinite',
+            ringPulse: 'ringPulse 2.4s ease-out infinite',
+            bounceSoft: 'bounceSoft 2.6s ease-in-out infinite',
+            hueSpin: 'hueSpin 16s linear infinite'
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    html, body { height: 100%; }
+    body { background: #020617; overflow: hidden; }
+    .bg-anim {
+      position: fixed; inset: 0; z-index: 0;
+      background:
+        radial-gradient(ellipse 90% 70% at 15% -10%, rgba(34,211,238,.22), transparent 60%),
+        radial-gradient(ellipse 70% 60% at 85% 0%, rgba(129,140,248,.18), transparent 60%),
+        radial-gradient(ellipse 70% 60% at 10% 110%, rgba(52,211,153,.14), transparent 60%),
+        radial-gradient(ellipse 60% 50% at 90% 110%, rgba(251,191,36,.12), transparent 60%),
+        #020617;
+      animation: hueSpin 16s linear infinite;
+    }
+    #binary-canvas { position: fixed; inset: 0; z-index: 1; opacity: .28; }
+    #particles { position: fixed; inset: 0; z-index: 2; pointer-events: none; overflow: hidden; }
+
+    .ascii-art { font-family: 'JetBrains Mono', ui-monospace, monospace; color: transparent; }
+    .char { opacity: 0; transition: opacity .4s ease; }
+    .char.show { opacity: 1; }
+    .ascii-art .char:hover { color: #facc15; text-shadow: 0 0 10px rgba(250,204,21,.9); }
+
+    .cursor {
+      display: inline-block; color: #22d3ee;
+      text-shadow: 0 0 10px #22d3ee;
+      animation: blink 1s step-end infinite;
+    }
+    .hide-until { opacity: 0; transition: opacity 1s ease; }
+    .hide-until.show { opacity: 1; }
+
+    .glass { background: rgba(15,23,42,.55); backdrop-filter: blur(10px); border: 1px solid rgba(148,163,184,.18); }
+    .scrollbar-hide::-webkit-scrollbar { display: none; }
+    .term-line { min-height: 1.5em; white-space: pre-wrap; word-break: break-word; }
+  </style>
+</head>
+<body class="text-slate-200 font-mono select-none">
+  <div class="bg-anim"></div>
+  <canvas id="binary-canvas"></canvas>
+  <div id="particles"></div>
+
+  <main class="relative z-10 h-screen flex flex-col items-center justify-center gap-4 px-4 overflow-hidden">
+    <button id="restart-btn" onclick="runAll()"
+      class="hide-until text-xs px-5 py-2 rounded-full border border-cyan-400/40 text-cyan-300 hover:bg-cyan-400/10 hover:scale-105 transition-all duration-300 shadow-[0_0_20px_rgba(34,211,238,.15)]">
+      ↻ re-run the magic
+    </button>
+
+    <pre id="ascii" class="ascii-art text-[6px] sm:text-[8px] md:text-[10px] leading-tight text-center"></pre>
+
+    <div class="text-center space-y-5 w-full flex flex-col items-center">
+      <div id="head-pill"
+        class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-amber-300/40 bg-amber-300/10 text-amber-200 text-[10px] sm:text-xs tracking-[0.3em] uppercase shadow-[0_0_25px_rgba(251,191,36,.15)]">
+        <span class="w-2 h-2 rounded-full bg-amber-300 animate-pulse"></span>
+        <span id="head-pill-text"></span>
+      </div>
+
+      <h1 id="title" class="text-4xl sm:text-5xl md:text-7xl font-bold leading-tight px-2 animate-glowTitle">
+        <span id="title-line1" class="text-slate-100 drop-shadow-[0_2px_18px_rgba(34,211,238,.45)]"></span><br />
+        <span id="title-line2"
+          class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-sky-400 to-emerald-300 drop-shadow-[0_0_30px_rgba(34,211,238,.35)]"></span><span id="title-caret" class="cursor" style="visibility:hidden">▍</span>
+      </h1>
+    </div>
+
+    <div id="badge" class="flex items-center justify-center gap-3 px-5 py-3 rounded-2xl glass animate-ringPulse max-w-xl">
+      <span class="text-2xl animate-bounceSoft">💻</span>
+      <p id="badge-text" class="text-cyan-100 text-sm sm:text-base">
+        <span id="badge-caret" class="cursor" style="visibility:hidden">▍</span>
+      </p>
+      <span class="text-2xl animate-bounceSoft" style="animation-delay:.3s">🎂</span>
+    </div>
+
+    <div id="code-window" class="w-full max-w-xl rounded-2xl glass shadow-2xl shadow-cyan-500/10 overflow-hidden">
+      <div class="flex items-center gap-2 px-4 py-3 border-b border-slate-700/50 bg-slate-900/50">
+        <span class="w-3 h-3 rounded-full bg-red-400/90"></span>
+        <span class="w-3 h-3 rounded-full bg-yellow-400/90"></span>
+        <span class="w-3 h-3 rounded-full bg-emerald-400/90"></span>
+        <span id="win-title" class="ml-3 text-xs text-slate-400">programmers-day.sh — bash</span>
+      </div>
+      <div id="code-output" class="p-4 text-xs sm:text-sm text-slate-300 term-line h-52 overflow-y-auto scrollbar-hide"></div>
+    </div>
+
+    <p id="footer" class="hide-until text-[10px] text-slate-500 tracking-[0.3em] uppercase"># print("Happy Coding")</p>
+  </main>
+
+  <script>
+    // ============================================================
+    //  BACKGROUND: binary rain
+    // ============================================================
+    const canvas = document.getElementById('binary-canvas');
+    const ctx = canvas.getContext('2d');
+    const FONT = 16;
+    let cols, drops;
+    const BITS = '01';
+
+    function sizeRain() {
+      canvas.width = innerWidth; canvas.height = innerHeight;
+      cols = Math.floor(canvas.width / FONT);
+      drops = Array(cols).fill(0).map(() => Math.random() * -40);
+    }
+    function rain() {
+      ctx.fillStyle = 'rgba(2,6,23,.09)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.font = FONT + 'px "JetBrains Mono", monospace';
+      for (let i = 0; i < cols; i++) {
+        ctx.fillStyle = Math.random() < .08 ? '#facc15' : Math.random() < .5 ? '#22d3ee' : '#0e7490';
+        ctx.fillText(BITS[Math.floor(Math.random() * 2)], i * FONT, drops[i] * FONT);
+        if (drops[i] * FONT > canvas.height + 40 && Math.random() > .98) drops[i] = Math.random() * -20;
+        drops[i]++;
+      }
+      requestAnimationFrame(rain);
+    }
+    sizeRain(); rain();
+    addEventListener('resize', sizeRain);
+
+    // ============================================================
+    //  BACKGROUND: floating code-symbol particles
+    // ============================================================
+    const partBox = document.getElementById('particles');
+    const GLYPHS = ['{','}','<','>',';','(',')','=','*','/','#','0','1','[',']','&','|','~','λ','§'];
+    for (let i = 0; i < 34; i++) {
+      const s = document.createElement('span');
+      s.textContent = GLYPHS[i % GLYPHS.length];
+      s.className = 'absolute animate-floatY';
+      s.style.cssText = `left:${Math.random()*100}%;top:${Math.random()*110-5}%;font-size:${10+Math.random()*20}px;`
+        + `color:hsla(${180+Math.random()*120},80%,65%,${.12+Math.random()*.28});`
+        + `animation-delay:${Math.random()*4}s;animation-duration:${3+Math.random()*4}s;`;
+      partBox.appendChild(s);
+    }
+
+    // ============================================================
+    //  TYPEWRITER ENGINE — natural, human-like writing
+    // ============================================================
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
+    const output = document.getElementById('code-output');
+    const scrollDown = () => { output.scrollTop = output.scrollHeight; };
+
+    // Append a whole string into a fresh line element.
+    async function typeText(line, text, cls, faster) {
+      const base = faster ? 55 : 90;
+      for (let i = 0; i < text.length; i++) {
+        let wait = base * (0.55 + Math.random() * 0.9);
+        if (' .,'.includes(text[i])) wait *= 2.2;
+        if ('.,!?;:'.includes(text[i])) wait *= 4.5;
+        if (Math.random() < 0.12) wait *= 2.6;
+        if (i % 9 === 0) wait *= 0.65;              // small speed run
+        const s = document.createElement('span');
+        s.textContent = text[i];
+        if (cls) s.className = cls;
+        line.appendChild(s);
+        scrollDown();
+        await sleep(wait);
+      }
+    }
+
+    // Creates a new blank line in the terminal.
+    function newLine() {
+      const d = document.createElement('div');
+      d.className = 'term-line';
+      output.appendChild(d);
+      scrollDown();
+      return d;
+    }
+
+    const promptSpan = () => {
+      const s = document.createElement('span');
+      s.className = 'text-emerald-400';
+      s.textContent = '$ ';
+      return s;
+    };
+
+    // ============================================================
+    //  ASCII ART — chars light up one by one
+    // ============================================================
+    const GLYPH = [
+      '.------..------..------..------..------.    .------.',
+      '|H.--. ||A.--. ||P.--. ||P.--. ||Y.--. |    |!.--. |',
+      '| :/\\: || (\\/) || :/\\: || :/\\: || (\\/) |    | (\\/) |',
+      '| :\\/: || :\\/: || (__) || (__) || :\\/: |    | :\\/: |',
+      '| \'--\'H|| \'--\'A|| \'--\'P|| \'--\'P|| \'--\'Y|    | \'--\'!|',
+      '`------\'`------\'`------\'`------\'`------\'    `------\''
+    ];
+
+    async function typeAscii() {
+      const el = document.getElementById('ascii');
+      el.textContent = '';
+      for (const line of GLYPH) {
+        const row = document.createElement('div');
+        el.appendChild(row);
+        for (const ch of line) {
+          const s = document.createElement('span');
+          s.className = 'char';
+          s.textContent = ch;
+          row.appendChild(s);
+          requestAnimationFrame(() => s.classList.add('show'));
+          await sleep(14);
+        }
+        await sleep(160);
+      }
+    }
+
+    // ============================================================
+    //  HEADLINE + BADGE — real typewriter with blinking caret
+    // ============================================================
+    const PILL = '256th day of the year';
+    const TITLE_L1 = 'Happy International';
+    const TITLE_L2 = 'Programmers\u2019 Day 2026!';
+    const BADGE = 'May your code compile first try, your rebases stay clean, and your coffee never run out.';
+
+    async function typePill() {
+      const el = document.getElementById('head-pill-text');
+      el.textContent = '';
+      const caret = document.createElement('span');
+      caret.className = 'cursor';
+      caret.textContent = '▍';
+      for (let i = 0; i < PILL.length; i++) {
+        el.textContent = PILL.slice(0, i + 1);
+        el.appendChild(caret);
+        await sleep(60);
+      }
+      caret.remove();
+    }
+
+    async function typeLine(el, text, faster) {
+      el.textContent = '';
+      const caret = document.getElementById('title-caret');
+      caret.style.visibility = 'visible';
+      for (let i = 0; i < text.length; i++) {
+        el.textContent = text.slice(0, i + 1);
+        let wait = (faster ? 110 : 165) * (0.6 + Math.random() * 0.8);
+        if (' ,'.includes(text[i])) wait *= 2.4;
+        if ('.!?;'.includes(text[i])) wait *= 4;
+        if (i % 9 === 0) wait *= 0.6;
+        await sleep(wait);
+      }
+    }
+
+    async function typeTitle() {
+      const c = document.getElementById('title-caret');
+      c.style.visibility = 'hidden';
+      await typeLine(document.getElementById('title-line1'), TITLE_L1, false);
+      await sleep(200);
+      await typeLine(document.getElementById('title-line2'), TITLE_L2, false);
+      c.style.visibility = 'hidden';
+    }
+
+    async function typeBadge() {
+      const p = document.getElementById('badge-text');
+      const caret = document.getElementById('badge-caret');
+      p.textContent = '';
+      p.innerHTML = '<span id="badge-caret" class="cursor" style="visibility:visible"></span>';
+      const c = document.getElementById('badge-caret');
+      for (let i = 0; i < BADGE.length; i++) {
+        p.textContent = BADGE.slice(0, i + 1);
+        p.appendChild(c);
+        await sleep(38);
+      }
+      c.remove();
+    }
+
+    // ============================================================
+    //  TERMINAL SESSION — a realistic little bash story
+    // ============================================================
+    const SESSION = [
+      { t: 'hdr', text: '🎂 HAPPY INTERNATIONAL PROGRAMMERS\u2019 DAY 2026' },
+      { t: 'comment', cls: 'text-slate-400', pre: '# ', text: 'A tiny bash story, told just for you. Sit back and enjoy. 🏁' },
+      { t: 'comment', cls: 'text-amber-300', pre: '# ', text: '💡 who is typing today?' },
+      { t: 'cmd', text: 'whoami', out: ['george@programmer'] },
+      { t: 'comment', cls: 'text-amber-300', pre: '# ', text: '📅 what day of the year is it, anyway?' },
+      { t: 'cmd', text: 'date +%j', out: ['256'] },
+      { t: 'comment', cls: 'text-amber-300', pre: '# ', text: '🧮 that\u2019s 2^8 — let\u2019s prove it:' },
+      { t: 'cmd', text: 'echo $(( 2 ** 8 ))', out: ['256'] },
+      { t: 'comment', cls: 'text-emerald-300', pre: '# ', text: '🔍 sweep the repo for leftover TODOs →' },
+      { t: 'cmdFix',
+        first: 'grep -rn "TODO" ',
+        wrong: 'srX/',
+        right: 'src/app.js',
+        out: ['src/app.js:12:  // TODO: remove this debug log'] },
+      { t: 'comment', cls: 'text-rose-300', pre: '# ', text: '🩹 ouch — delete that line and re-check.' },
+      { t: 'cmd', text: 'sed -i "12d" src/app.js', out: [] },
+      { t: 'comment', cls: 'text-emerald-300', pre: '# ', text: '✅ re-check for clean code, then celebrate:' },
+      { t: 'cmd', text: 'grep -rn "TODO" src && echo "still here 😅" || echo "No TODOs left 🎉"', out: ['No TODOs left 🎉'] },
+      { t: 'comment', cls: 'text-amber-300', pre: '# ', text: '☕ the only pipeline that really matters:' },
+      { t: 'cmd', text: 'make coffee; make progress; celebrate()', out: ['☕ compiling into a legendary dev 🚀'] },
+      { t: 'comment', cls: 'text-cyan-300', pre: '# ❤ ', text: 'May your code compile first try & your coffee never run out.' },
+      { t: 'cmd', text: 'echo "Happy 256th day, programmer 🖥️"', out: ['Happy 256th day, programmer 🖥️'] }
+    ];
+
+    async function runCmd(step) {
+      if (step.t === 'hdr') {
+        const line = newLine();
+        await typeText(line, step.text, 'text-fuchsia-300 font-bold', true);
+        const ul = newLine();
+        await typeText(ul, '\u2500'.repeat(46), 'text-fuchsia-400/40', true);
+        await sleep(300);
+        return;
+      }
+      if (step.t === 'comment') {
+        const line = newLine();
+        await typeText(line, step.pre, step.cls || 'text-slate-500', true);
+        await typeText(line, step.text, step.cls || 'text-slate-500', true);
+        await sleep(260);
+        return;
+      }
+      const line = newLine();
+      line.appendChild(promptSpan());
+      await typeText(line, step.text, 'text-slate-200');
+      await sleep(420);
+      for (const o of step.out) {
+        const ol = newLine();
+        await typeText(ol, o, 'text-cyan-400/90', true);
+        await sleep(180);
+      }
+      await sleep(220);
+    }
+
+    // A command that makes a typo, backspaces, and fixes itself.
+    async function runCmdFix(step) {
+      const line = newLine();
+      line.appendChild(promptSpan());
+      await typeText(line, step.first, 'text-slate-200');
+
+      // the mistake
+      for (const ch of step.wrong) {
+        const s = document.createElement('span');
+        s.className = 'text-red-400';
+        s.textContent = ch;
+        line.appendChild(s);
+        scrollDown();
+        await sleep(130);
+      }
+      await sleep(650);                       // pause… notice the typo
+
+      // backspace it away
+      for (let i = 0; i < step.wrong.length; i++) {
+        await sleep(150);
+        line.lastChild.remove();
+        scrollDown();
+      }
+      await sleep(350);
+
+      await typeText(line, step.right, 'text-slate-200');
+      await sleep(500);
+      for (const o of step.out) {
+        const ol = newLine();
+        await typeText(ol, o, 'text-red-300/90', true);
+        await sleep(200);
+      }
+      await sleep(240);
+    }
+
+    async function typeTerminal() {
+      output.textContent = '';
+      for (const step of SESSION) {
+        if (step.t === 'cmdFix') await runCmdFix(step);
+        else await runCmd(step);
+      }
+      await sleep(600);
+      document.getElementById('win-title').textContent = 'programmers-day.sh — bash — made with <3';
+    }
+
+    // ============================================================
+    //  ORCHESTRATE THE WHOLE SHOW
+    // ============================================================
+    async function runAll() {
+      document.querySelectorAll('.hide-until').forEach(e => e.classList.remove('show'));
+      document.getElementById('ascii').replaceChildren();
+      document.getElementById('head-pill-text').textContent = '';
+      document.getElementById('title-line1').textContent = '';
+      document.getElementById('title-line2').textContent = '';
+      const tc = document.getElementById('title-caret');
+      tc.style.visibility = 'hidden';
+      output.textContent = '';
+      document.getElementById('win-title').textContent = 'programmers-day.sh — bash';
+
+      await sleep(400);
+      await typeAscii();                         // 1. ASCII lights up
+      await sleep(350);
+      await typePill();                          // 2. pill badge types in
+      await sleep(150);
+      await typeTitle();                         // 3. headline types in slowly
+      await sleep(250);
+      await typeBadge();                         // 4. badge message types in
+      await sleep(250);
+      await typeTerminal();                      // 5. terminal tells a story
+      document.getElementById('restart-btn').classList.add('show');
+      document.getElementById('footer').classList.add('show');
+    }
+
+    runAll();
+  </script>
+</body>
+</html>
